@@ -120,16 +120,16 @@ describe('TariffsComponent', () => {
 
   describe('template rendering', () => {
     it('should render all filter buttons', () => {
-      const compiled = fixture.nativeElement;
-      const buttons = compiled.querySelectorAll('.filters button');
+      const element = fixture.nativeElement;
+      const buttons = element.querySelectorAll('.filters button');
       expect(buttons.length).toBe(component.filterConfigs.length);
     });
 
     it('should display correct sort indicators', async () => {
-      const compiled = fixture.nativeElement;
+      const element = fixture.nativeElement;
       fixture.detectChanges();
 
-      let priceButton = compiled.querySelector('[aria-label="Sort by price"]');
+      let priceButton = element.querySelector('[aria-label="Sort by price"]');
       expect(priceButton.querySelector('span').textContent.trim()).toBe('↑');
 
       component.updateSort('price');
@@ -138,10 +138,10 @@ describe('TariffsComponent', () => {
     });
 
     it('should render tariff cards', async () => {
-      const compiled = fixture.nativeElement;
+      const element = fixture.nativeElement;
       fixture.detectChanges();
 
-      const tariffCards = compiled.querySelectorAll('app-tariff-card');
+      const tariffCards = element.querySelectorAll('app-tariff-card');
       expect(tariffCards.length).toBe(mockTariffs.length);
     });
   });
