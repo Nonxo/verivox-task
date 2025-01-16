@@ -1,6 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {map, Observable} from 'rxjs';
-import {Tariff} from '../core/interface/tariff';
+import {BehaviorSubject, combineLatest, distinctUntilChanged, map, Observable, shareReplay} from 'rxjs';
+import {Tariff, TariffFilterConfig, TariffSortConfig} from '../core/interface/tariff';
 import {TariffService} from '../core/services/tariff.service';
 import {AsyncPipe} from '@angular/common';
 import {TariffCardComponent} from './tariff-card/tariff-card.component';
@@ -17,39 +17,80 @@ import {TariffCardComponent} from './tariff-card/tariff-card.component';
 })
 export class TariffsComponent implements OnInit{
 
+  private readonly sortConfig = new BehaviorSubject<TariffSortConfig>({
+    criteria: 'price',
+    order: 'asc'
+  });
+
+
+  filterConfigs: TariffFilterConfig[] = [
+    {
+      key: 'price',
+      label: 'Price',
+      ariaLabel: 'Sort by price'
+    },
+    {
+      key: 'downloadSpeed',
+      label: 'Download Speed',
+      ariaLabel: 'Sort by download speed'
+    },
+    {
+      key: 'uploadSpeed',
+      label: 'Upload Speed',
+      ariaLabel: 'Sort by upload speed'
+    }
+  ];
+
+
   tariffs$: Observable<Tariff[]> | undefined;
-  sortBy: string = 'price';
-  sortOrder: 'asc' | 'desc' = 'asc';
+  sortConfig$ = this.sortConfig.asObservable();
 
   tariffs: Tariff[] = [];
 
   private readonly tariffService = inject(TariffService);
 
   ngOnInit(): void {
-    this.tariffs$ = this.tariffService.getTariffs().pipe(
-      map(response => this.sortTariffs(response.tariffs))
+
+    const rawTariffs$ = this.tariffService.getTariffs().pipe(
+      map(response => response.tariffs),
+      shareReplay(1)
+    );
+
+    // Combine latest sort config with tariffs to create sorted stream
+    this.tariffs$ = combineLatest([
+      rawTariffs$,
+      this.sortConfig$.pipe(distinctUntilChanged())
+    ]).pipe(
+      map(([tariffs, sortConfig]) => this.sortTariffs(tariffs, sortConfig))
     );
   }
 
-  sortTariffs(tariffs: Tariff[]): Tariff[] {
+  private sortTariffs(tariffs: Tariff[], config: TariffSortConfig): Tariff[] {
     return [...tariffs].sort((a, b) => {
-      const factor = this.sortOrder === 'asc' ? 1 : -1;
-      return (a[this.sortBy as keyof Tariff] as number) * factor -
-        (b[this.sortBy as keyof Tariff] as number) * factor;
+      const aValue = a[config.criteria];
+      const bValue = b[config.criteria];
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return config.order === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      const factor = config.order === 'asc' ? 1 : -1;
+      return ((aValue as number) - (bValue as number)) * factor;
     });
   }
 
-  updateSort(criteria: string): void {
-    if (this.sortBy === criteria) {
-      this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortBy = criteria;
-      this.sortOrder = 'asc';
-    }
+  updateSort(criteria: keyof Tariff): void {
+    const currentConfig = this.sortConfig.value;
+    const newConfig: TariffSortConfig = {
+      criteria,
+      order: currentConfig.criteria === criteria
+        ? (currentConfig.order === 'asc' ? 'desc' : 'asc')
+        : 'asc'
+    };
 
-    this.tariffs$ = this.tariffService.getTariffs().pipe(
-      map(response => this.sortTariffs(response.tariffs))
-    );
+    this.sortConfig.next(newConfig);
   }
 
 }

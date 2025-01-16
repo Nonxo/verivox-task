@@ -2,14 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TariffsComponent } from './tariffs.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TariffService } from '../core/services/tariff.service';
-import { of } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
+import { TariffCardComponent } from './tariff-card/tariff-card.component';
+import { of, firstValueFrom } from 'rxjs';
+import { Tariff } from '../core/interface/tariff';
 
 describe('TariffsComponent', () => {
   let component: TariffsComponent;
   let fixture: ComponentFixture<TariffsComponent>;
   let tariffServiceMock: jasmine.SpyObj<TariffService>;
 
-  const mockTariffs = [
+  const mockTariffs: Tariff[] = [
     {
       id: 1,
       name: 'Basic Internet',
@@ -29,13 +32,18 @@ describe('TariffsComponent', () => {
   ];
 
   beforeEach(async () => {
-    // Create spy object before TestBed configuration
     tariffServiceMock = jasmine.createSpyObj('TariffService', ['getTariffs']);
     tariffServiceMock.getTariffs.and.returnValue(of({ tariffs: mockTariffs }));
 
     await TestBed.configureTestingModule({
-      imports: [TariffsComponent],
-      providers: [{ provide: TariffService, useValue: tariffServiceMock }],
+      imports: [
+        TariffsComponent,
+        AsyncPipe,
+        TariffCardComponent
+      ],
+      providers: [
+        { provide: TariffService, useValue: tariffServiceMock }
+      ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
@@ -48,83 +56,93 @@ describe('TariffsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have a container element', () => {
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.container')).toBeTruthy();
-  });
-
-  it('should render tariff list', () => {
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.tariff-list')).toBeTruthy();
-  });
-
-  it('should render filters', () => {
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.filters')).toBeTruthy();
-  });
-
-  it('should initialize tariffs$ on ngOnInit', (done) => {
-    component.ngOnInit();
-    component.tariffs$?.subscribe(tariffs => {
-      expect(tariffs.length).toBe(2);
-      expect(tariffs[0].price).toBe(299.99);
-      expect(tariffs[1].price).toBe(499.99);
-      done();
+  it('should initialize with correct filter configurations', () => {
+    expect(component.filterConfigs.length).toBe(3);
+    expect(component.filterConfigs[0]).toEqual({
+      key: 'price',
+      label: 'Price',
+      ariaLabel: 'Sort by price'
     });
   });
 
-  it('should sort tariffs by price ascending', () => {
-    const sortedTariffs = component.sortTariffs([...mockTariffs]);
-    component.sortBy = 'price';
-    component.sortOrder = 'asc';
-
-    expect(sortedTariffs[0].price).toBe(299.99);
-    expect(sortedTariffs[1].price).toBe(499.99);
+  it('should initialize tariffs$ with default sorting', async () => {
+    const tariffs = await firstValueFrom(component.tariffs$!);
+    expect(tariffs.length).toBe(2);
+    expect(tariffs[0].price).toBe(299.99);
+    expect(tariffs[1].price).toBe(499.99);
   });
 
-  it('should sort tariffs by price descending', () => {
-    component.sortBy = 'price';
-    component.sortOrder = 'desc';
-    const sortedTariffs = component.sortTariffs([...mockTariffs]);
-
-    expect(sortedTariffs[0].price).toBe(499.99);
-    expect(sortedTariffs[1].price).toBe(299.99);
+  it('should call tariffService.getTariffs on init', () => {
+    expect(tariffServiceMock.getTariffs).toHaveBeenCalled();
   });
 
-  it('should update sort criteria and order correctly', () => {
-    component.sortBy = 'price';
-    component.sortOrder = 'desc';
+  describe('sorting functionality', () => {
+    it('should sort tariffs by price ascending by default', async () => {
+      const tariffs = await firstValueFrom(component.tariffs$!);
+      expect(tariffs[0].price).toBe(299.99);
+      expect(tariffs[1].price).toBe(499.99);
+    });
 
-    // First click - ascending
-    component.updateSort('price');
-    expect(component.sortBy).toBe('price');
-    expect(component.sortOrder).toBe('asc');
+    it('should sort tariffs by price descending when toggled', async () => {
+      component.updateSort('price');
+      const tariffs = await firstValueFrom(component.tariffs$!);
+      expect(tariffs[0].price).toBe(499.99);
+      expect(tariffs[1].price).toBe(299.99);
+    });
 
-    // Second click - descending
-    component.updateSort('price');
+    it('should sort tariffs by download speed', async () => {
+      component.updateSort('downloadSpeed');
+      const tariffs = await firstValueFrom(component.tariffs$!);
+      expect(tariffs[0].downloadSpeed).toBe(50);
+      expect(tariffs[1].downloadSpeed).toBe(100);
+    });
 
-    expect(component.sortBy).toBe('price');
-    expect(component.sortOrder).toBe('desc');
+    it('should sort tariffs by upload speed', async () => {
+      component.updateSort('uploadSpeed');
+      const tariffs = await firstValueFrom(component.tariffs$!);
+      expect(tariffs[0].uploadSpeed).toBe(10);
+      expect(tariffs[1].uploadSpeed).toBe(20);
+    });
 
-    // Click different criteria - ascending
-    component.updateSort('name');
-    expect(component.sortBy).toBe('name');
-    expect(component.sortOrder).toBe('asc');
+    it('should handle sort updates correctly', async () => {
+      let sortConfig = await firstValueFrom(component.sortConfig$);
+      expect(sortConfig).toEqual({ criteria: 'price', order: 'asc' });
+
+      component.updateSort('price');
+      sortConfig = await firstValueFrom(component.sortConfig$);
+      expect(sortConfig).toEqual({ criteria: 'price', order: 'desc' });
+
+      component.updateSort('downloadSpeed');
+      sortConfig = await firstValueFrom(component.sortConfig$);
+      expect(sortConfig).toEqual({ criteria: 'downloadSpeed', order: 'asc' });
+    });
   });
 
-  it('should sort tariffs by download speed', () => {
-    component.sortBy = 'downloadSpeed';
-    component.sortOrder = 'desc';
-    const sortedTariffs = component.sortTariffs([...mockTariffs]);
-    expect(sortedTariffs[0].downloadSpeed).toBe(100);
-    expect(sortedTariffs[1].downloadSpeed).toBe(50);
-  });
+  describe('template rendering', () => {
+    it('should render all filter buttons', () => {
+      const compiled = fixture.nativeElement;
+      const buttons = compiled.querySelectorAll('.filters button');
+      expect(buttons.length).toBe(component.filterConfigs.length);
+    });
 
-  it('should sort tariffs by upload speed', () => {
-    component.sortBy = 'uploadSpeed';
-    component.sortOrder = 'desc';
-    const sortedTariffs = component.sortTariffs([...mockTariffs]);
-    expect(sortedTariffs[0].uploadSpeed).toBe(20);
-    expect(sortedTariffs[1].uploadSpeed).toBe(10);
+    it('should display correct sort indicators', async () => {
+      const compiled = fixture.nativeElement;
+      fixture.detectChanges();
+
+      let priceButton = compiled.querySelector('[aria-label="Sort by price"]');
+      expect(priceButton.querySelector('span').textContent.trim()).toBe('↑');
+
+      component.updateSort('price');
+      fixture.detectChanges();
+      expect(priceButton.querySelector('span').textContent.trim()).toBe('↓');
+    });
+
+    it('should render tariff cards', async () => {
+      const compiled = fixture.nativeElement;
+      fixture.detectChanges();
+
+      const tariffCards = compiled.querySelectorAll('app-tariff-card');
+      expect(tariffCards.length).toBe(mockTariffs.length);
+    });
   });
 });

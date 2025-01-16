@@ -1,34 +1,20 @@
 <main class="container">
   <!-- Filter section -->
-  <div class="filters">
-    <button
-      (click)="updateSort('price')"
-      [class.active]="sortBy === 'price'"
-      aria-label="Sort by price">
-      Price
-      <span aria-hidden="true">
-        {{ sortBy === 'price' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
-      </span>
-    </button>
-    <button
-      (click)="updateSort('downloadSpeed')"
-      [class.active]="sortBy === 'downloadSpeed'"
-      aria-label="Sort by download speed">
-      Download Speed
-      <span aria-hidden="true">
-        {{ sortBy === 'downloadSpeed' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
-      </span>
-    </button>
-    <button
-      (click)="updateSort('uploadSpeed')"
-      [class.active]="sortBy === 'uploadSpeed'"
-      aria-label="Sort by upload speed">
-      Upload Speed
-      <span aria-hidden="true">
-        {{ sortBy === 'uploadSpeed' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
-      </span>
-    </button>
-  </div>
+  @if ((sortConfig$ | async); as sortConfig) {
+    <div class="filters">
+      @for (filter of filterConfigs; track filter.key) {
+        <button
+          (click)="updateSort(filter.key)"
+          [class.active]="sortConfig.criteria === filter.key"
+          [attr.aria-label]="filter.ariaLabel">
+          {{ filter.label }}
+          <span aria-hidden="true">
+              {{ sortConfig.criteria === filter.key ? (sortConfig.order === 'asc' ? '↑' : '↓') : '' }}
+            </span>
+        </button>
+      }
+    </div>
+  }
 
   <!-- Tariff list section -->
   <div class="tariff-list">
