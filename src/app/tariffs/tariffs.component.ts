@@ -75,7 +75,7 @@ export class TariffsComponent implements OnInit{
       }
 
       const factor = config.order === 'asc' ? 1 : -1;
-      return ((Number(aValue)) - (Number(bValue)) * factor);
+      return ((Number(aValue)) - (Number(bValue))) * factor;
     });
   }
 
@@ -87,6 +87,7 @@ export class TariffsComponent implements OnInit{
         ? (currentConfig.order === 'asc' ? 'desc' : 'asc')
         : 'asc'
     };
+
     this.sortConfig.next(newConfig);
   }
 
