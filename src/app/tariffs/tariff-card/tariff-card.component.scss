@@ -18,6 +18,10 @@
   grid-gap: 0.5rem;
   align-items: flex-start;
 
+  @include small-mobile {
+    grid-gap: 0.1rem;
+  }
+
   .divider {
     display: none;
   }
@@ -60,7 +64,6 @@
     display: flex;
 
     .price {
-      font-size: 1.25rem;
       font-weight: bold;
       color: var(--primary-color);
     }

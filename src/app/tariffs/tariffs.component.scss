@@ -7,6 +7,10 @@
   height: 100%;
   max-height: 92vh;
   box-sizing: border-box;
+
+  @include small-mobile {
+    max-height: 78vh;
+  }
 }
 
 .filters {
