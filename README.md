@@ -110,6 +110,5 @@ The application displays internet tariffs with the following information:
 - Price (formatted as XXX,XX €)
 - Download speed
 - Upload speed
-- Contract length
 - Features/Benefits
 
