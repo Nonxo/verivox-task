@@ -1,0 +1,108 @@
+{
+  "tariffs": [
+    {
+      "id": 1,
+      "name": "Basic Internet",
+      "price": 299.99,
+      "downloadSpeed": 50,
+      "uploadSpeed": 10,
+      "features": [
+        "Basic Support 9-5",
+        "Standard WiFi Router",
+        "Email Service"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Premium Internet",
+      "price": 499.99,
+      "downloadSpeed": 100,
+      "uploadSpeed": 20,
+      "features": [
+        "24/7 Support",
+        "Advanced WiFi Router",
+        "TV Package Basic"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Ultra Internet",
+      "price": 799.99,
+      "downloadSpeed": 250,
+      "uploadSpeed": 50,
+      "features": [
+        "Priority Support",
+        "Premium WiFi Router",
+        "TV Package Premium"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Gamer Pro",
+      "price": 899.99,
+      "downloadSpeed": 500,
+      "uploadSpeed": 100,
+      "features": [
+        "Gaming Router",
+        "Low Latency Mode",
+        "DDoS Protection"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Business Elite",
+      "price": 129.99,
+      "downloadSpeed": 1000,
+      "uploadSpeed": 200,
+      "features": [
+        "24/7 Premium Support",
+        "Enterprise Router",
+        "Multiple Static IPs"
+      ]
+    },
+    {
+      "name": "Basic Plan",
+      "price": 19.99,
+      "downloadSpeed": 50,
+      "uploadSpeed": 10,
+      "features": [
+        "No data cap",
+        "Free router",
+        "Free installation"
+      ]
+    },
+    {
+      "name": "Standard Plan",
+      "price": 29.99,
+      "downloadSpeed": 100,
+      "uploadSpeed": 20,
+      "features": [
+        "No data cap",
+        "Free router",
+        "Free installation"
+      ]
+    },
+    {
+      "name": "Premium Plan",
+      "price": 39.99,
+      "downloadSpeed": 200,
+      "uploadSpeed": 50,
+      "features": [
+        "No data cap",
+        "Free router",
+        "Priority support"
+      ]
+    },
+    {
+      "name": "Ultimate Plan",
+      "price": 49.99,
+      "downloadSpeed": 500,
+      "uploadSpeed": 100,
+      "features": [
+        "No data cap",
+        "Free router",
+        "Free streaming service"
+      ]
+    }
+  ]
+}

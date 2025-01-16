@@ -1,0 +1,39 @@
+<main class="container">
+  <!-- Filter section -->
+  <div class="filters">
+    <button
+      (click)="updateSort('price')"
+      [class.active]="sortBy === 'price'"
+      aria-label="Sort by price">
+      Price
+      <span aria-hidden="true">
+        {{ sortBy === 'price' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
+      </span>
+    </button>
+    <button
+      (click)="updateSort('downloadSpeed')"
+      [class.active]="sortBy === 'downloadSpeed'"
+      aria-label="Sort by download speed">
+      Download Speed
+      <span aria-hidden="true">
+        {{ sortBy === 'downloadSpeed' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
+      </span>
+    </button>
+    <button
+      (click)="updateSort('uploadSpeed')"
+      [class.active]="sortBy === 'uploadSpeed'"
+      aria-label="Sort by upload speed">
+      Upload Speed
+      <span aria-hidden="true">
+        {{ sortBy === 'uploadSpeed' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Tariff list section -->
+  <div class="tariff-list">
+    @for (tariff of tariffs$ | async; let i = $index; track tariff.id) {
+      <app-tariff-card [tariff]="tariff" [index]="i"></app-tariff-card>
+    }
+  </div>
+</main>
