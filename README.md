@@ -1,6 +1,6 @@
 # VerivoxTask
 
-A responsive Angular application for displaying and filtering internet tariffs. Built with Angular 18, featuring mobile-first design and comprehensive unit tests.
+A responsive Angular application for displaying and sorting internet tariffs. Built with Angular 18, featuring mobile-first design and comprehensive unit tests.
 
 ## Features
 
